@@ -26,14 +26,11 @@ void Client::do_read()
     }
 }
 
-void Client::do_write()
+void Client::do_write(const char* message)
 {
     BaseMessage write_msg;
-
-    char* hello = "Hello from the client.";
-
-    write_msg.body_length(std::strlen(hello));
-    std::memcpy(write_msg.body(), hello, write_msg.body_length());
+    write_msg.body_length(std::strlen(message));
+    std::memcpy(write_msg.body(), message, write_msg.body_length());
     write_msg.encode_header();
 
     send(socket->get_sock(), write_msg.data(), write_msg.length(), 0);
@@ -43,7 +40,6 @@ void Client::launch()
 {
     while(true)
     {
-        do_write();
         do_read();
     }
 }
@@ -51,5 +47,19 @@ void Client::launch()
 int main()
 {
     Client client(AF_INET, SOCK_STREAM, 0, 80, INADDR_ANY);
-    client.launch();
+    
+    std::thread t(
+        [&client](){
+            client.launch();
+        }
+    );
+
+    char line[BaseMessage::max_body_length + 1] = {'\0'};
+
+    while(std::cin.getline(line, BaseMessage::max_body_length + 1))
+    {
+        client.do_write(line);
+    }
+
+    t.join();
 }

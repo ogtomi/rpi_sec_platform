@@ -3,6 +3,8 @@
 
 #include <unistd.h>
 #include <cstring>
+#include <thread>
+
 #include "../sockets/c_socket.hpp"
 #include "../messages/base_message.hpp"
 
@@ -16,11 +18,11 @@ public:
     Client(int domain, int service, int protocol, int port, u_long interface);
     ~Client();
     void launch();
+    void do_write(const char* message);
     CSocket* get_socket();
 
 private:
     void do_read();
-    void do_write();
 };
 
 #endif
