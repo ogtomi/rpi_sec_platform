@@ -30,13 +30,3 @@ int MSocket::get_sock()
 {
     return sock;
 }
-
-int MSocket::get_connection()
-{
-    return connection;
-}
-
-void MSocket::set_connection(int con)
-{
-    connection = con;
-}

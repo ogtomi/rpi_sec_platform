@@ -11,7 +11,6 @@ class MSocket
 private:
     struct sockaddr_in address;
     int sock;
-    int connection;
     int option = 1;
 
 public:
@@ -21,9 +20,6 @@ public:
 
     struct sockaddr_in get_address();
     int get_sock();
-    int get_connection();
-
-    void set_connection(int con);
 };
 
 #endif
