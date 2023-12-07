@@ -51,9 +51,10 @@ void Server::launch()
 {
     std::cout << "Waiting for connection..." << std::endl;
     
+    do_accept();
+
     while(true)
     {
-        do_accept();
         do_read();
         do_write();
     }
