@@ -15,6 +15,7 @@ private:
 
 public:
     Client(int domain, int service, int protocol, int port, u_long interface);
+    ~Client();
     void launch();
     CSocket* get_socket();
 

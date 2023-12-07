@@ -15,6 +15,7 @@ private:
 
 public:
     Server(int domain, int service, int protocol, int port, u_long interface, int bcklg);
+    ~Server();
     void launch();
     SSocket* get_socket();
 

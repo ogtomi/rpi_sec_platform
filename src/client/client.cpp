@@ -5,6 +5,11 @@ Client::Client(int domain, int service, int protocol, int port, u_long interface
     socket = new CSocket(domain, service, protocol, port, interface);
 }
 
+Client::~Client()
+{
+    delete socket;
+}
+
 CSocket* Client::get_socket()
 {
     return socket;
@@ -28,10 +33,7 @@ void Client::launch()
 {
     while(true)
     {
-        std::cout << "Writing..." << std::endl;
         do_write();
-
-        std::cout << "Reading..." << std::endl;
         do_read();
     }
 }

@@ -5,6 +5,11 @@ Server::Server(int domain, int service, int protocol, int port, u_long interface
     socket = new SSocket(domain, service, protocol, port, interface, bcklg);
 }
 
+Server::~Server()
+{
+    delete socket;
+}
+
 SSocket* Server::get_socket()
 {
     return socket;
