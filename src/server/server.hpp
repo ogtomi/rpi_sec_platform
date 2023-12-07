@@ -4,14 +4,14 @@
 #include <unistd.h>
 #include <cstring>
 #include "../sockets/s_socket.hpp"
+#include "../messages/base_message.hpp"
 
 class Server
 {
 private:
-    enum { BUFF_SIZE = 30000};
-    char buffer[BUFF_SIZE] = {0};
     int new_socket;
     SSocket* socket;
+    BaseMessage msg;
 
 public:
     Server(int domain, int service, int protocol, int port, u_long interface, int bcklg);
@@ -23,8 +23,6 @@ private:
     void do_accept();
     void do_read();
     void do_write();
-    void handler();
-    void responder();
 };
 
 #endif

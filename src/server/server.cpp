@@ -32,15 +32,19 @@ void Server::do_accept()
 
 void Server::do_read()
 {
-    read(new_socket, buffer, BUFF_SIZE);
-    std::cout << "C: " << buffer << std::endl;
+    read(new_socket, msg.header(), BaseMessage::header_length);
+
+    if(msg.decode_header())
+    {
+        read(new_socket, msg.body(), msg.body_length());
+        std::cout << "C: " << msg.body() << std::endl;
+    }
 }
 
 void Server::do_write()
 {
-    char* hello = "Hello from the server";
 
-    write(new_socket, hello, std::strlen(hello));
+    write(new_socket, msg.data(), msg.length());
 }
 
 void Server::launch()

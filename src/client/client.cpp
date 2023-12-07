@@ -17,16 +17,26 @@ CSocket* Client::get_socket()
 
 void Client::do_read()
 {
-    read(socket->get_sock(), buffer, BUFF_SIZE);
+    read(socket->get_sock(), read_msg.header(), BaseMessage::header_length);
 
-    std::cout << "MSG read: " << buffer << std::endl;
+    if(read_msg.decode_header())
+    {
+        read(socket->get_sock(), read_msg.body(), read_msg.body_length());
+        std::cout << "S: " << read_msg.body() << std::endl;
+    }
 }
 
 void Client::do_write()
 {
+    BaseMessage write_msg;
+
     char* hello = "Hello from the client.";
 
-    send(socket->get_sock(), hello, std::strlen(hello), 0);
+    write_msg.body_length(std::strlen(hello));
+    std::memcpy(write_msg.body(), hello, write_msg.body_length());
+    write_msg.encode_header();
+
+    send(socket->get_sock(), write_msg.data(), write_msg.length(), 0);
 }
 
 void Client::launch()

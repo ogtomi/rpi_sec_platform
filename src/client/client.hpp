@@ -4,14 +4,13 @@
 #include <unistd.h>
 #include <cstring>
 #include "../sockets/c_socket.hpp"
+#include "../messages/base_message.hpp"
 
 class Client
 {
 private:
-    enum { BUFF_SIZE = 30000};
-    char buffer[BUFF_SIZE] = {0};
-    int new_socket;
     CSocket* socket;
+    BaseMessage read_msg;
 
 public:
     Client(int domain, int service, int protocol, int port, u_long interface);
