@@ -20,7 +20,9 @@ public:
     SSocket* get_socket();
 
 private:
-    void accepter();
+    void do_accept();
+    void do_read();
+    void do_write();
     void handler();
     void responder();
 };

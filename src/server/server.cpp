@@ -15,38 +15,43 @@ SSocket* Server::get_socket()
     return socket;
 }
 
-void Server::accepter()
+void Server::do_accept()
 {
     struct sockaddr_in address = socket->get_address();
     int addrlen = sizeof(address);
 
     new_socket = accept(socket->get_sock(), (struct sockaddr*) &address, (socklen_t*) &addrlen);
 
-    read(new_socket, buffer, BUFF_SIZE);
+    if(new_socket < 0)
+    {
+        perror("Socket fail.");
+        close(new_socket);
+        exit(EXIT_FAILURE);
+    }
 }
 
-void Server::handler()
+void Server::do_read()
 {
-    std::cout << buffer << std::endl;
+    read(new_socket, buffer, BUFF_SIZE);
+    std::cout << "C: " << buffer << std::endl;
 }
 
-void Server::responder()
+void Server::do_write()
 {
     char* hello = "Hello from the server";
 
     write(new_socket, hello, std::strlen(hello));
-    close(new_socket);
 }
 
 void Server::launch()
 {
+    std::cout << "Waiting for connection..." << std::endl;
+    
     while(true)
     {
-        std::cout << "======= WAITING =======" << std::endl;
-        accepter();
-        handler();
-        responder();
-        std::cout << "======= DONE =======" << std::endl;
+        do_accept();
+        do_read();
+        do_write();
     }
 }
 
