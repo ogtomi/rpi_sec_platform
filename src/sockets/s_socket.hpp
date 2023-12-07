@@ -12,6 +12,7 @@ private:
     
 public:
     SSocket(int domain, int service, int protocol, int port, u_long interface, int bklg);
+    virtual ~SSocket(){};
     int connect_to_network(int sock, struct sockaddr_in address);
     int start_listening();
 };

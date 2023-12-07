@@ -15,6 +15,7 @@ private:
 
 public:
     MSocket(int domain, int service, int protocol, int port, u_long interface);
+    virtual ~MSocket(){};
     virtual int connect_to_network(int sock, struct sockaddr_in address) = 0;
     void test_connection(int test_item);
 
