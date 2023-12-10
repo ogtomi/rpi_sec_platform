@@ -1,12 +1,13 @@
 CXX="g++"
 CXX_FLAGS= -Wall
+OPENSSL_FLAGS= -lssl -lcrypto
 
 OUT_SERVER="server_run.exe"
 OUT_CLIENT="client_run.exe"
 
-all: server.o client.o s_socket.o c_socket.o m_socket.o base_message.o
-	${CXX} ${CXX_FLAGS} server.o s_socket.o m_socket.o base_message.o -o ${OUT_SERVER}
-	${CXX} ${CXX_FLAGS} client.o c_socket.o m_socket.o base_message.o -o ${OUT_CLIENT}
+all: server.o client.o s_socket.o c_socket.o m_socket.o base_message.o crypto.o
+	${CXX} ${CXX_FLAGS} server.o s_socket.o m_socket.o base_message.o crypto.o -o ${OUT_SERVER} ${OPENSSL_FLAGS}
+	${CXX} ${CXX_FLAGS} client.o c_socket.o m_socket.o base_message.o crypto.o -o ${OUT_CLIENT} ${OPENSSL_FLAGS}
 
 server.o: src/server/server.cpp src/server/server.hpp
 	${CXX} ${CXX_FLAGS} -I . -c src/server/server.cpp
@@ -25,7 +26,10 @@ m_socket.o: src/sockets/m_socket.cpp src/sockets/m_socket.hpp
 
 base_message.o: src/messages/base_message.cpp src/messages/base_message.hpp
 	${CXX} ${CXX_FLAGS} -I . -c src/messages/base_message.cpp
-	
+
+crypto.o: src/crypto/crypto.cpp src/crypto/crypto.hpp
+	${CXX} ${CXX_FLAGS} -I . -c src/crypto/crypto.cpp
+
 clean:
 	rm -rf *.o
 	rm ${OUT_SERVER} ${OUT_CLIENT}
