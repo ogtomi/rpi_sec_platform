@@ -32,19 +32,30 @@ void Server::do_accept()
 
 void Server::do_read()
 {
+    read(new_socket, msg.data(), BaseMessage::hash_length);
+    std::cout << "Hash read: " << msg.data() << std::endl;
+
     read(new_socket, msg.header(), BaseMessage::header_length);
 
     if(msg.decode_header())
     {
         read(new_socket, msg.body(), msg.body_length());
-        std::cout << "C: " << msg.body() << std::endl;
+
+        if(msg.check_hash())
+        {
+            std::cout << "SHA256 hash checked successfully" << std::endl;
+            std::cout << "C: " << msg.body() << std::endl;
+        }
     }
 }
 
 void Server::do_write()
 {
-
+    msg.encode_header();
+    msg.encode_hash();
+    
     write(new_socket, msg.data(), msg.length());
+    std::memset(msg.data(), 0, msg.length());
 }
 
 void Server::launch()

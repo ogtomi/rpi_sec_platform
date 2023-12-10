@@ -17,13 +17,23 @@ CSocket* Client::get_socket()
 
 void Client::do_read()
 {
+    read(socket->get_sock(), read_msg.data(), BaseMessage::hash_length);
+    std::cout << "Hash read: " << read_msg.data() << std::endl;
+
     read(socket->get_sock(), read_msg.header(), BaseMessage::header_length);
 
     if(read_msg.decode_header())
     {
         read(socket->get_sock(), read_msg.body(), read_msg.body_length());
-        std::cout << "S: " << read_msg.body() << std::endl;
+
+        if(read_msg.check_hash())
+        {
+            std::cout << "SHA256 hash checked successfully" << std::endl;
+            std::cout << "S: " << read_msg.body() << std::endl;
+        }
     }
+
+    std::memset(read_msg.data(), 0, read_msg.length());
 }
 
 void Client::do_write(const char* message)
@@ -31,7 +41,9 @@ void Client::do_write(const char* message)
     BaseMessage write_msg;
     write_msg.body_length(std::strlen(message));
     std::memcpy(write_msg.body(), message, write_msg.body_length());
+    
     write_msg.encode_header();
+    write_msg.encode_hash();
 
     send(socket->get_sock(), write_msg.data(), write_msg.length(), 0);
 }
