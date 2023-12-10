@@ -28,7 +28,9 @@ void Client::do_read()
 
         if(read_msg.check_hash())
         {
+            std::cout << "S: " << read_msg.body() << std::endl;
             std::cout << "SHA256 hash checked successfully" << std::endl;
+            read_msg.aes_128_cbc_decrypt(aes_128_key, iv);
             std::cout << "S: " << read_msg.body() << std::endl;
         }
     }
@@ -42,6 +44,7 @@ void Client::do_write(const char* message)
     write_msg.body_length(std::strlen(message));
     std::memcpy(write_msg.body(), message, write_msg.body_length());
     
+    write_msg.aes_128_cbc_encrypt(aes_128_key, iv);
     write_msg.encode_header();
     write_msg.encode_hash();
 

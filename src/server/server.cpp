@@ -43,7 +43,9 @@ void Server::do_read()
 
         if(msg.check_hash())
         {
+            std::cout << "C: " << msg.body() << std::endl;
             std::cout << "SHA256 hash checked successfully" << std::endl;
+            msg.aes_128_cbc_decrypt(aes_128_key, iv);
             std::cout << "C: " << msg.body() << std::endl;
         }
     }
@@ -51,6 +53,7 @@ void Server::do_read()
 
 void Server::do_write()
 {
+    msg.aes_128_cbc_encrypt(aes_128_key, iv);
     msg.encode_header();
     msg.encode_hash();
     
