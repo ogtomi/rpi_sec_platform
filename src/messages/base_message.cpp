@@ -101,3 +101,31 @@ bool BaseMessage::check_hash()
 
     return true;
 }
+
+void BaseMessage::aes_128_cbc_encrypt(unsigned char* aes_128_key, unsigned char* iv)
+{
+    char ciphertext_buff[max_body_length + 1] = {'\0'};
+    int ciphertext_len = crypto.aes_128_cbc_encrypt(reinterpret_cast<unsigned char*> (this->body()),
+                                                    this->body_length(),
+                                                    aes_128_key,
+                                                    iv,
+                                                    reinterpret_cast<unsigned char*> (ciphertext_buff));
+
+    std::memset(this->data(), 0, this->length());
+    this->body_length(ciphertext_len);
+    std::memcpy(this->body(), ciphertext_buff, this->body_length());
+}
+
+void BaseMessage::aes_128_cbc_decrypt(unsigned char* aes_128_key, unsigned char* iv)
+{
+    char plaintext_buff[max_body_length + 1] = {'\0'};
+    int plaintext_len = crypto.aes_128_cbc_decrypt(reinterpret_cast<unsigned char*> (this->body()),
+                                                    this->body_length(),
+                                                    aes_128_key,
+                                                    iv,
+                                                    reinterpret_cast<unsigned char*> (plaintext_buff));
+
+    std::memset(this->data(), 0, this->length());
+    this->body_length(plaintext_len);
+    std::memcpy(this->body(), plaintext_buff, this->body_length());
+}

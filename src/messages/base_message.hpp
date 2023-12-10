@@ -33,6 +33,9 @@ public:
     void encode_header();
     void encode_hash();
     bool check_hash();
+
+    void aes_128_cbc_encrypt(unsigned char* aes_128_key, unsigned char* iv);
+    void aes_128_cbc_decrypt(unsigned char* aes_128_key, unsigned char* iv);
 };
 
 #endif
