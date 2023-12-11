@@ -36,6 +36,7 @@ public:
     CSocket* get_socket();
 
 private:
+    void do_handshake();
     void do_read();
 };
 

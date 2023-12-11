@@ -28,6 +28,24 @@ void Server::do_accept()
         close(new_socket);
         exit(EXIT_FAILURE);
     }
+    else
+    {
+        do_handshake();
+        std::cout << "Client connected." << std::endl;
+    }
+}
+
+void Server::do_handshake()
+{
+    read(new_socket, aes_128_key, AES_128_KEY_SIZE);
+    std::cout << "Key received from the client" << std::endl;
+    for(auto &c: aes_128_key) printf("%02x", c);
+    std::cout << "\n";
+
+    read(new_socket, iv, IV_SIZE);
+    std::cout << "IV received from the client" << std::endl;
+    for(auto &c: iv) printf("%02x", c);
+    std::cout << "\n";
 }
 
 void Server::do_read()
@@ -43,7 +61,6 @@ void Server::do_read()
 
         if(msg.check_hash())
         {
-            std::cout << "C: " << msg.body() << std::endl;
             std::cout << "SHA256 hash checked successfully" << std::endl;
             msg.aes_128_cbc_decrypt(aes_128_key, iv);
             std::cout << "C: " << msg.body() << std::endl;

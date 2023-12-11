@@ -3,6 +3,8 @@
 Client::Client(int domain, int service, int protocol, int port, u_long interface)
 {
     socket = new CSocket(domain, service, protocol, port, interface);
+
+    do_handshake();
 }
 
 Client::~Client()
@@ -13,6 +15,15 @@ Client::~Client()
 CSocket* Client::get_socket()
 {
     return socket;
+}
+
+void Client::do_handshake()
+{       
+    write(socket->get_sock(), aes_128_key, AES_128_KEY_SIZE);
+    std::cout << "Key sent to the server" << std::endl;
+
+    write(socket->get_sock(), iv, IV_SIZE);
+    std::cout << "IV sent to the server" << std::endl;
 }
 
 void Client::do_read()
@@ -28,7 +39,6 @@ void Client::do_read()
 
         if(read_msg.check_hash())
         {
-            std::cout << "S: " << read_msg.body() << std::endl;
             std::cout << "SHA256 hash checked successfully" << std::endl;
             read_msg.aes_128_cbc_decrypt(aes_128_key, iv);
             std::cout << "S: " << read_msg.body() << std::endl;
