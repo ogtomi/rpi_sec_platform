@@ -17,6 +17,7 @@ private:
     int new_socket;
     SSocket* socket;
     BaseMessage msg;
+    Crypto crypto;
 
 public:
     Server(int domain, int service, int protocol, int port, u_long interface, int bcklg);

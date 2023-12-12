@@ -18,12 +18,13 @@ CSocket* Client::get_socket()
 }
 
 void Client::do_handshake()
-{       
-    write(socket->get_sock(), aes_128_key, AES_128_KEY_SIZE);
-    std::cout << "Key sent to the server" << std::endl;
-
-    write(socket->get_sock(), iv, IV_SIZE);
-    std::cout << "IV sent to the server" << std::endl;
+{   
+    // READ THE KEY FROM THE SERVER
+    // WRITE THEY KEY TO THE SERVER
+    // ECDH --> shared secret
+    // HASH the shared secret with SHA256
+    // Encrypt the AES KEY & IV with HASH as a key
+    // SEND encrypted AES KEY & IV to the server
 }
 
 void Client::do_read()

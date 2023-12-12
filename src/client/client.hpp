@@ -13,6 +13,7 @@ class Client
 private:
     CSocket* socket;
     BaseMessage read_msg;
+    Crypto crypto;
 
     // CRYPTO - DEV
     enum { AES_128_KEY_SIZE = 16};

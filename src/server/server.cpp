@@ -37,15 +37,17 @@ void Server::do_accept()
 
 void Server::do_handshake()
 {
-    read(new_socket, aes_128_key, AES_128_KEY_SIZE);
-    std::cout << "Key received from the client" << std::endl;
-    for(auto &c: aes_128_key) printf("%02x", c);
-    std::cout << "\n";
+    EVP_PKEY *skey = crypto.generate_ec_key();
+    // Serialize key
+    unsigned char* serialized_key = crypto.serialize_key(skey);
 
-    read(new_socket, iv, IV_SIZE);
-    std::cout << "IV received from the client" << std::endl;
-    for(auto &c: iv) printf("%02x", c);
-    std::cout << "\n";
+    std::cout << "Serialized key" << std::string(reinterpret_cast<char *>(serialized_key)) << std::endl;
+    // WRITE THE KEY TO CLIENT
+    // READ THE KEY FROM THE CLIENT
+    // ECDH --> shared secret
+    // HASH the shared secret with SHA256
+    // READ encrypted AES KEY & IV from the client
+    // Decrypt the AES KEY & IV with HASH as a key
 }
 
 void Server::do_read()
