@@ -1,5 +1,5 @@
 CXX="g++"
-CXX_FLAGS= -Wall
+CXX_FLAGS= -Wall -Wzero-as-null-pointer-constant
 OPENSSL_FLAGS= -lssl -lcrypto
 
 OUT_SERVER="server_run.exe"
