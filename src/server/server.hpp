@@ -5,6 +5,7 @@
 #include <cstring>
 #include "../sockets/s_socket.hpp"
 #include "../messages/base_message.hpp"
+#include "../messages/key_message.hpp"
 
 class Server
 {

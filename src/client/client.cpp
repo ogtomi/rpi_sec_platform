@@ -19,9 +19,37 @@ CSocket* Client::get_socket()
 
 void Client::do_handshake()
 {   
-    // READ THE KEY FROM THE SERVER
+    // Generate and serialize key
+    EVP_PKEY* ckey = crypto.generate_ec_key();
+    size_t serialized_key_len = 0;
+    unsigned char* serialized_key = crypto.serialize_key(ckey, serialized_key_len);
+
+    // Read key from the server
+    KeyMessage server_pubkey_msg;
+    read(socket->get_sock(), server_pubkey_msg.data(), KeyMessage::header_length);
+
+    if(server_pubkey_msg.decode_header())
+    {
+        read(socket->get_sock(), server_pubkey_msg.body(), server_pubkey_msg.body_length());
+    }
+
     // WRITE THEY KEY TO THE SERVER
+    KeyMessage client_pubkey_msg;
+    client_pubkey_msg.body_length(serialized_key_len);
+    std::memcpy(client_pubkey_msg.body(), serialized_key, client_pubkey_msg.body_length());
+    client_pubkey_msg.encode_header();
+    write(socket->get_sock(), client_pubkey_msg.data(), client_pubkey_msg.length());
+
     // ECDH --> shared secret
+    EVP_PKEY* skey = crypto.deserialize_key((unsigned char*)server_pubkey_msg.body(), server_pubkey_msg.body_length());
+    
+    size_t secret_len = 0;
+    unsigned char* secret = crypto.ecdh(&secret_len, ckey, skey);
+
+    std::cout << "\n";
+    for(size_t i = 0; i < secret_len; i++) printf("%02x", secret[i]);
+    std::cout << "\n";
+    
     // HASH the shared secret with SHA256
     // Encrypt the AES KEY & IV with HASH as a key
     // SEND encrypted AES KEY & IV to the server
