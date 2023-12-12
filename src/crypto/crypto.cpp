@@ -7,7 +7,7 @@ void Crypto::sha256(char* msg, size_t msg_size, unsigned char* output_buff)
 
     EVP_DigestInit_ex(mdctx, md, NULL);
     EVP_DigestUpdate(mdctx, msg, msg_size);
-    EVP_DigestFinal_ex(mdctx, output_buff, 0);
+    EVP_DigestFinal_ex(mdctx, output_buff, NULL);
 
     EVP_MD_CTX_destroy(mdctx);
 }
@@ -49,7 +49,7 @@ int Crypto::aes_128_cbc_encrypt(unsigned char* plaintext, int plaintext_len, uns
 
 int Crypto::aes_128_cbc_decrypt(unsigned char* ciphertext, int ciphertext_len, unsigned char* aes_128_key, unsigned char* iv, unsigned char* plaintext)
 {
-    EVP_CIPHER_CTX *ctx;
+    EVP_CIPHER_CTX *ctx = NULL;
     int len;
     int plaintext_len;
 
@@ -80,4 +80,100 @@ int Crypto::aes_128_cbc_decrypt(unsigned char* ciphertext, int ciphertext_len, u
     EVP_CIPHER_CTX_free(ctx);
 
     return plaintext_len;
+}
+
+EVP_PKEY* Crypto::generate_ec_key()
+{
+    EVP_PKEY_CTX *ctx;
+    EVP_PKEY *pkey = NULL;
+
+    ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL);
+
+    if(ctx == NULL)
+        goto err;
+    
+    if(EVP_PKEY_keygen_init(ctx) <= 0)
+        goto err;
+
+    if(EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx, NID_X9_62_prime256v1) <= 0)
+        goto err;
+
+    if(EVP_PKEY_keygen(ctx, &pkey) <= 0)
+        goto err;
+    
+    std::cout << "Key generation successful" << std::endl;
+
+    EVP_PKEY_CTX_free(ctx);
+    
+    return pkey;
+
+    err:
+        EVP_PKEY_CTX_free(ctx);
+        return NULL;
+}
+
+unsigned char* Crypto::ecdh(size_t *secret_len, EVP_PKEY *pkey, EVP_PKEY *peerkey)
+{
+    EVP_PKEY_CTX *ctx = NULL;
+    unsigned char *secret;
+
+    if((ctx = EVP_PKEY_CTX_new(pkey, NULL)) == NULL)
+    {
+        std::cout << "Error during creation of the context for the shared sacred derivation" << std::endl;
+    }
+
+    if(EVP_PKEY_derive_init(ctx) != 1)
+    {
+        std::cout << "Error during initialisation" << std::endl;
+    }
+
+    if(EVP_PKEY_derive_set_peer(ctx, peerkey) != 1)
+    {
+        std::cout << "Error during providing the peer public key" << std::endl;
+    }
+
+    if(EVP_PKEY_derive(ctx, NULL, secret_len) != 1)
+    {
+        std::cout << "Error during determining the buffer length for shared secret" << std::endl;
+    }
+
+    if((secret = (unsigned char*)OPENSSL_malloc(*secret_len)) == NULL)
+    {
+        std::cout << "Error during creation of the buffer" << std::endl;
+    }
+
+    if((EVP_PKEY_derive(ctx, secret, secret_len)) != 1)
+    {
+        std::cout << "Error during derivation of the secret key" << std::endl;
+    }
+
+    EVP_PKEY_CTX_free(ctx);
+    EVP_PKEY_free(pkey);
+    EVP_PKEY_free(peerkey);
+
+    return secret;
+}
+
+unsigned char* Crypto::serialize_key(EVP_PKEY* pkey)
+{
+    size_t serialized_pubkey_len = 0;
+
+    if(EVP_PKEY_get_octet_string_param(pkey, OSSL_PKEY_PARAM_PUB_KEY, NULL, 0, &serialized_pubkey_len) != 1)
+    {
+        std::cout << "Error during get octet string param" << std::endl;
+    }
+
+    unsigned char* serialized_pubkey = (unsigned char*) OPENSSL_malloc(serialized_pubkey_len);
+
+    if(EVP_PKEY_get_octet_string_param(pkey, OSSL_PKEY_PARAM_PUB_KEY, serialized_pubkey, serialized_pubkey_len, &serialized_pubkey_len) != 1)
+    {
+        std::cout << "Error during get the serialized public key" << std::endl;
+    }
+
+    return serialized_pubkey;
+}
+
+EVP_PKEY* Crypto::deserialize_key(unsigned char* serialized_key)
+{
+    return NULL;
 }
