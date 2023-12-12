@@ -7,6 +7,7 @@
 #include <openssl/ec.h>
 #include <openssl/sha.h>
 #include <openssl/core_names.h>
+#include <openssl/param_build.h>
 
 class Crypto
 {
@@ -17,7 +18,7 @@ public:
     EVP_PKEY* generate_ec_key();
     unsigned char* ecdh(size_t *secret_len, EVP_PKEY *pkey, EVP_PKEY *peerkey);
     unsigned char* serialize_key(EVP_PKEY* pkey, size_t& serialized_pubkey_len);
-    EVP_PKEY* deserialize_key(unsigned char* serialized_key);
+    EVP_PKEY* deserialize_key(unsigned char* serialized_pubkey, size_t serialized_pubkey_len);
 };
 
 #endif

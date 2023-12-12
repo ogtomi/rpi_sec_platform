@@ -101,7 +101,7 @@ EVP_PKEY* Crypto::generate_ec_key()
     if(EVP_PKEY_keygen(ctx, &pkey) <= 0)
         goto err;
     
-    std::cout << "Key generation successful" << std::endl;
+    std::cout << "Key generation successful." << std::endl;
 
     EVP_PKEY_CTX_free(ctx);
 
@@ -171,7 +171,65 @@ unsigned char* Crypto::serialize_key(EVP_PKEY* pkey, size_t& serialized_pubkey_l
     return serialized_pubkey;
 }
 
-EVP_PKEY* Crypto::deserialize_key(unsigned char* serialized_key)
+EVP_PKEY* Crypto::deserialize_key(unsigned char* serialized_pubkey, size_t serialized_pubkey_len)
 {
-    return NULL;
+    OSSL_PARAM_BLD* param_build = OSSL_PARAM_BLD_new();
+
+    if(param_build == NULL)
+    {
+        OSSL_PARAM_BLD_free(param_build);
+        return NULL;
+    }
+
+    if(OSSL_PARAM_BLD_push_utf8_string(param_build, OSSL_PKEY_PARAM_GROUP_NAME, "prime256v1", 0) != 1)
+    {
+        OSSL_PARAM_BLD_free(param_build);
+        return NULL;
+    }
+    
+    if(OSSL_PARAM_BLD_push_octet_string(param_build, OSSL_PKEY_PARAM_PUB_KEY, serialized_pubkey, serialized_pubkey_len) != 1)
+    {
+        OSSL_PARAM_BLD_free(param_build);
+        return NULL;
+    }
+    
+    OSSL_PARAM* params = OSSL_PARAM_BLD_to_param(param_build);
+
+    if(params == NULL)
+    {
+        OSSL_PARAM_BLD_free(param_build);
+        return NULL;
+    }
+
+    EVP_PKEY_CTX* pubkey_ctx = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL);
+    if(pubkey_ctx == NULL)
+    {
+        OSSL_PARAM_BLD_free(param_build);
+        OSSL_PARAM_free(params);
+        return NULL;
+    }
+
+    if(EVP_PKEY_fromdata_init(pubkey_ctx) <= 0)
+    {
+        OSSL_PARAM_BLD_free(param_build);
+        OSSL_PARAM_free(params);
+        EVP_PKEY_CTX_free(pubkey_ctx);
+        return NULL;
+    }
+
+    EVP_PKEY* pubkey = NULL;
+    
+    if(EVP_PKEY_fromdata(pubkey_ctx, &pubkey, EVP_PKEY_PUBLIC_KEY, params) <= 0)
+    {
+        OSSL_PARAM_BLD_free(param_build);
+        OSSL_PARAM_free(params);
+        EVP_PKEY_CTX_free(pubkey_ctx);
+        return NULL;
+    }
+
+    OSSL_PARAM_BLD_free(param_build);
+    OSSL_PARAM_free(params);
+    EVP_PKEY_CTX_free(pubkey_ctx);
+
+    return pubkey;
 }
