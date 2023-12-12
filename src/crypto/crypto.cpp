@@ -104,7 +104,7 @@ EVP_PKEY* Crypto::generate_ec_key()
     std::cout << "Key generation successful" << std::endl;
 
     EVP_PKEY_CTX_free(ctx);
-    
+
     return pkey;
 
     err:
@@ -154,10 +154,8 @@ unsigned char* Crypto::ecdh(size_t *secret_len, EVP_PKEY *pkey, EVP_PKEY *peerke
     return secret;
 }
 
-unsigned char* Crypto::serialize_key(EVP_PKEY* pkey)
+unsigned char* Crypto::serialize_key(EVP_PKEY* pkey, size_t& serialized_pubkey_len)
 {
-    size_t serialized_pubkey_len = 0;
-
     if(EVP_PKEY_get_octet_string_param(pkey, OSSL_PKEY_PARAM_PUB_KEY, NULL, 0, &serialized_pubkey_len) != 1)
     {
         std::cout << "Error during get octet string param" << std::endl;
