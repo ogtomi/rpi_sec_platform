@@ -37,20 +37,31 @@ void Server::do_accept()
 
 void Server::do_handshake()
 {
-    // Generate and serialize key
-    EVP_PKEY *skey = crypto.generate_ec_key();
-    size_t serialized_key_len = 0;
-    unsigned char* serialized_key = crypto.serialize_key(skey, serialized_key_len);
+    // Client & Server keys (+ key messages)
+    EVP_PKEY *ckey = NULL, *skey = NULL;
+    KeyMessage server_pubkey_msg, client_pubkey_msg;
 
-    // Write key to the client
-    KeyMessage server_pubkey_msg;
+    // Key serialization vars
+    size_t serialized_key_len = 0;
+    unsigned char* serialized_key = NULL;
+    
+    // Shared secret (ECDH)
+    unsigned char* secret = NULL;
+    size_t secret_len = 0;
+    unsigned char hashed_secret[SHA256_DIGEST_LENGTH] = {'\0'};
+
+    // HANDSHAKE
+    // Generate and serialize the key
+    skey = crypto.generate_ec_key();
+    serialized_key = crypto.serialize_key(skey, serialized_key_len);
+
+    // Send the key to the client
     server_pubkey_msg.body_length(serialized_key_len);
     std::memcpy(server_pubkey_msg.body(), serialized_key, server_pubkey_msg.body_length());
     server_pubkey_msg.encode_header();
     write(new_socket, server_pubkey_msg.data(), server_pubkey_msg.length());
     
-    // READ THE KEY FROM THE CLIENT
-    KeyMessage client_pubkey_msg;
+    // Read key from the client
     read(new_socket, client_pubkey_msg.data(), KeyMessage::header_length);
 
     if(client_pubkey_msg.decode_header())
@@ -58,26 +69,26 @@ void Server::do_handshake()
         read(new_socket, client_pubkey_msg.body(), client_pubkey_msg.body_length());
     }
 
-    // ECDH --> shared secret
-    EVP_PKEY* ckey = crypto.deserialize_key((unsigned char*)client_pubkey_msg.body(), client_pubkey_msg.body_length());
-
-    size_t secret_len = 0;
-    unsigned char* secret = crypto.ecdh(&secret_len, skey, ckey);
+    // Obtain a shared secret using ECDH
+    ckey = crypto.deserialize_key((unsigned char*)client_pubkey_msg.body(), client_pubkey_msg.body_length());
+    secret = crypto.ecdh(&secret_len, skey, ckey);
     
-    // HASH the shared secret with SHA256
-    unsigned char hashed_secret[SHA256_DIGEST_LENGTH] = {'\0'};
+    // Hash the shared secret with SHA256
     crypto.sha256((char*)secret, secret_len, hashed_secret);
 
-    // USE FIRST 128-Bytes as AES key and SECOND 128-Bytes as IV
+    // Use the first 128 bytes as AES-128 key and the second 128 bytes as IV
     std::memcpy(aes_128_key, hashed_secret, AES_128_KEY_SIZE);
     std::memcpy(iv, hashed_secret + AES_128_KEY_SIZE, IV_SIZE);
+
+    EVP_PKEY_free(ckey);
+    EVP_PKEY_free(skey);
+    free(serialized_key);
+    free(secret);
 }
 
 void Server::do_read()
 {
     read(new_socket, msg.data(), BaseMessage::hash_length);
-    std::cout << "Hash read: " << msg.data() << std::endl;
-
     read(new_socket, msg.header(), BaseMessage::header_length);
 
     if(msg.decode_header())
