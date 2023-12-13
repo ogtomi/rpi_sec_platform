@@ -50,11 +50,9 @@ void Client::do_handshake()
     unsigned char hashed_secret[SHA256_DIGEST_LENGTH] = {'\0'};
     crypto.sha256((char*)secret, secret_len, hashed_secret);
 
-    std::cout << "\n";
-    for(size_t i = 0; i < SHA256_DIGEST_LENGTH; i++) printf("%02x", hashed_secret[i]);
-    std::cout << "\n";
-    // Encrypt the AES KEY & IV with HASH as a key
-    // SEND encrypted AES KEY & IV to the server
+    // USE FIRST 128-Bytes as AES key and SECOND 128-Bytes as IV
+    std::memcpy(aes_128_key, hashed_secret, AES_128_KEY_SIZE);
+    std::memcpy(iv, hashed_secret + AES_128_KEY_SIZE, IV_SIZE);
 }
 
 void Client::do_read()
