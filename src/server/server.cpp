@@ -64,11 +64,13 @@ void Server::do_handshake()
     size_t secret_len = 0;
     unsigned char* secret = crypto.ecdh(&secret_len, skey, ckey);
     
-    std::cout << "\n";
-    for(size_t i = 0; i < secret_len; i++) printf("%02x", secret[i]);
-    std::cout << "\n";
-    
     // HASH the shared secret with SHA256
+    unsigned char hashed_secret[SHA256_DIGEST_LENGTH] = {'\0'};
+    crypto.sha256((char*)secret, secret_len, hashed_secret);
+
+    std::cout << "\n";
+    for(size_t i = 0; i < SHA256_DIGEST_LENGTH; i++) printf("%02x", hashed_secret[i]);
+    std::cout << "\n";
     // READ encrypted AES KEY & IV from the client
     // Decrypt the AES KEY & IV with HASH as a key
 }
