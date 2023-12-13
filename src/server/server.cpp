@@ -80,8 +80,6 @@ void Server::do_handshake()
     std::memcpy(aes_128_key, hashed_secret, AES_128_KEY_SIZE);
     std::memcpy(iv, hashed_secret + AES_128_KEY_SIZE, IV_SIZE);
 
-    EVP_PKEY_free(ckey);
-    EVP_PKEY_free(skey);
     free(serialized_key);
     free(secret);
 }
