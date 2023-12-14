@@ -30,12 +30,20 @@ void Server::do_accept()
     }
     else
     {
-        do_handshake();
-        std::cout << "Client connected." << std::endl;
+        if(!do_handshake())
+        {
+            perror("Handshake fail.");
+            close(new_socket);
+            exit(EXIT_FAILURE);
+        }
+        else
+        {
+            std::cout << "Client connected." << std::endl;
+        }
     }
 }
 
-void Server::do_handshake()
+bool Server::do_handshake()
 {
     // Client & Server keys (+ key messages)
     EVP_PKEY *ckey = NULL, *skey = NULL;
@@ -53,7 +61,10 @@ void Server::do_handshake()
     // HANDSHAKE
     // Generate and serialize the key
     skey = crypto.generate_ec_key();
+    if(skey == NULL) return false;
+
     serialized_key = crypto.serialize_key(skey, serialized_key_len);
+    if(serialized_key == NULL) return false;
 
     // Send the key to the client
     server_pubkey_msg.body_length(serialized_key_len);
@@ -68,11 +79,18 @@ void Server::do_handshake()
     {
         read(new_socket, client_pubkey_msg.body(), client_pubkey_msg.body_length());
     }
+    else
+    {
+        return false;
+    }
 
     // Obtain a shared secret using ECDH
     ckey = crypto.deserialize_key((unsigned char*)client_pubkey_msg.body(), client_pubkey_msg.body_length());
+    if(ckey == NULL) return false;
+
     secret = crypto.ecdh(&secret_len, skey, ckey);
-    
+    if(secret == NULL) return false;
+
     // Hash the shared secret with SHA256
     crypto.sha256((char*)secret, secret_len, hashed_secret);
 
@@ -82,6 +100,8 @@ void Server::do_handshake()
 
     free(serialized_key);
     free(secret);
+
+    return true;
 }
 
 void Server::do_read()

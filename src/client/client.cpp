@@ -4,7 +4,12 @@ Client::Client(int domain, int service, int protocol, int port, u_long interface
 {
     socket = new CSocket(domain, service, protocol, port, interface);
 
-    do_handshake();
+    if(!do_handshake())
+    {
+        perror("Handshake fail.");
+        close(socket->get_sock());
+        exit(EXIT_FAILURE);
+    }
 }
 
 Client::~Client()
@@ -17,7 +22,7 @@ CSocket* Client::get_socket()
     return socket;
 }
 
-void Client::do_handshake()
+bool Client::do_handshake()
 {   
     // Client & Server keys (+ key messages)
     EVP_PKEY *ckey = NULL, *skey = NULL;
@@ -35,7 +40,10 @@ void Client::do_handshake()
     // HANDSHAKE
     // Generate and serialize key
     ckey = crypto.generate_ec_key();
+    if(ckey == NULL) return false;
+
     serialized_key = crypto.serialize_key(ckey, serialized_key_len);
+    if(serialized_key == NULL) return false;
 
     // Read key from the server
     read(socket->get_sock(), server_pubkey_msg.data(), KeyMessage::header_length);
@@ -43,6 +51,10 @@ void Client::do_handshake()
     if(server_pubkey_msg.decode_header())
     {
         read(socket->get_sock(), server_pubkey_msg.body(), server_pubkey_msg.body_length());
+    }
+    else
+    {
+        return false;
     }
 
     // Send the key to the server
@@ -53,7 +65,10 @@ void Client::do_handshake()
 
     // Obtain a shared secret using ECDH
     skey = crypto.deserialize_key((unsigned char*)server_pubkey_msg.body(), server_pubkey_msg.body_length());
+    if(skey == NULL) return false;
+
     secret = crypto.ecdh(&secret_len, ckey, skey);
+    if(secret == NULL) return false;
     
     // Hash the shared secret with SHA256
     crypto.sha256((char*)secret, secret_len, hashed_secret);
@@ -64,6 +79,8 @@ void Client::do_handshake()
 
     free(serialized_key);
     free(secret);
+
+    return true;
 }
 
 void Client::do_read()

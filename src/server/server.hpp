@@ -29,7 +29,7 @@ public:
 
 private:
     void do_accept();
-    void do_handshake();
+    bool do_handshake();
     void do_read();
     void do_write();
 };

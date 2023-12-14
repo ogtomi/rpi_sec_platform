@@ -29,7 +29,7 @@ public:
     CSocket* get_socket();
 
 private:
-    void do_handshake();
+    bool do_handshake();
     void do_read();
 };
 
