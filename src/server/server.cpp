@@ -94,7 +94,7 @@ bool Server::do_handshake()
     // Hash the shared secret with SHA256
     crypto.sha256((char*)secret, secret_len, hashed_secret);
 
-    // Use the first 128 bytes as AES-128 key and the second 128 bytes as IV
+    // Use the first 128 bits as AES-128 key and the second 128 bits as IV
     std::memcpy(aes_128_key, hashed_secret, AES_128_KEY_SIZE);
     std::memcpy(iv, hashed_secret + AES_128_KEY_SIZE, IV_SIZE);
 
