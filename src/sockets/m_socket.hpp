@@ -1,3 +1,4 @@
+
 #ifndef _MSOCKET_H_
 #define _MSOCKET_H_
 
@@ -5,6 +6,7 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netdb.h>
 
 class MSocket
 {

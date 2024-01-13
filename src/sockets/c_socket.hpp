@@ -9,7 +9,7 @@ private:
     int connection;
     
 public:
-    CSocket(int domain, int service, int protocol, int port, u_long interface);
+    CSocket(int domain, int service, int protocol, int port, u_long interface, struct sockaddr_in server);
     virtual ~CSocket(){};
     int connect_to_network(int sock, struct sockaddr_in address);
 };
