@@ -22,7 +22,7 @@ private:
     unsigned char iv[IV_SIZE] = {'\0'};
 
 public:
-    Client(int domain, int service, int protocol, int port, u_long interface);
+    Client(int domain, int service, int protocol, int port, u_long interface, struct sockaddr_in server);
     ~Client();
     void launch();
     void do_write(const char* message);

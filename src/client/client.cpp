@@ -1,8 +1,8 @@
 #include "client.hpp"
 
-Client::Client(int domain, int service, int protocol, int port, u_long interface)
+Client::Client(int domain, int service, int protocol, int port, u_long interface, struct sockaddr_in server)
 {
-    socket = new CSocket(domain, service, protocol, port, interface);
+    socket = new CSocket(domain, service, protocol, port, interface, server);
 
     if(!do_handshake())
     {
@@ -124,9 +124,23 @@ void Client::launch()
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    Client client(AF_INET, SOCK_STREAM, 0, 80, INADDR_ANY);
+    struct hostent *hp;
+    struct sockaddr_in server;
+
+    if(argc != 3)
+    {
+        std::cerr << "Usage: " << argv[0] << " host port" << std::endl;
+        return 1;
+    }
+
+    hp = gethostbyname(argv[1]);
+    std::memcpy(&server.sin_addr, hp->h_addr_list[0], hp->h_length);
+    server.sin_family = AF_INET;
+    server.sin_port = htons(atoi(argv[2]));
+
+    Client client(AF_INET, SOCK_STREAM, 0, 80, INADDR_ANY, server);
     
     std::thread t(
         [&client](){
