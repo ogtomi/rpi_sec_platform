@@ -1,9 +1,9 @@
-CXX="g++"
+#CXX="g++"
 CXX_FLAGS= -Wall -Wzero-as-null-pointer-constant
 OPENSSL_FLAGS= -lssl -lcrypto
 
-OUT_SERVER="server_run.exe"
-OUT_CLIENT="client_run.exe"
+OUT_SERVER="rpiserver"
+OUT_CLIENT="rpiclient"
 
 all: server.o client.o s_socket.o c_socket.o m_socket.o base_message.o key_message.o crypto.o
 	${CXX} ${CXX_FLAGS} server.o s_socket.o m_socket.o base_message.o key_message.o crypto.o -o ${OUT_SERVER} ${OPENSSL_FLAGS}
