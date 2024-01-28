@@ -145,8 +145,21 @@ void Server::launch()
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    Server server(AF_INET, SOCK_STREAM, 0, 80, INADDR_ANY, 10);
+    int port = 80;
+
+    if(argc != 2)
+    {
+        std::cout << "Usage: " << argv[0] << " port " << std::endl;
+        std::cout << "PORT 80 IS DEFAULT" << std::endl;
+    }
+    else
+    {
+        port = atoi(argv[1]);
+        std::cout << "PORT SET TO " << port << std::endl;
+    }
+
+    Server server(AF_INET, SOCK_STREAM, 0, port, INADDR_ANY, 10);
     server.launch();   
 }
