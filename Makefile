@@ -17,13 +17,18 @@ OBJS			:= $(foreach dir,$(SUBDIRS),$(patsubst $(dir)/%.cpp,$(OBJDIR)/%.o,$(filte
 
 vpath %.cpp $(SUBDIRS)
 
-all: $(OBJS)
+all: server client
+
+server: $(filter-out $(OBJDIR)/$(CLIENTO), $(OBJS))
+	@echo -SERVER-
 	$(CXX) $(CXX_FLAGS) $^ -o $(BINDIR)/$(SERVER_EXE) $(OPENSSL_FLAGS) $(LIBPQXX_FLAGS)
-#	$(CXX) $(CXX_FLAGS) $^ -o $(BINDIR)/$(CLIENT_EXE) $(OPENSSL_FLAGS) $(LIBPQXX_FLAGS)
+
+client: $(filter-out $(OBJDIR)/$(SERVERO), $(OBJS))
+	@echo -CLIENT-
+	$(CXX) $(CXX_FLAGS) $^ -o $(BINDIR)/$(CLIENT_EXE) $(OPENSSL_FLAGS) $(LIBPQXX_FLAGS)
 
 $(OBJDIR)/%.o: %.cpp
 	$(CXX) $(CXX_FLAGS) -c $< -o $@
 
 clean:
 	rm $(OBJDIR)/*.o $(BINDIR)/*
-	
