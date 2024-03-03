@@ -7,14 +7,16 @@
 #include "../sockets/s_socket.hpp"
 #include "../messages/base_message.hpp"
 #include "../messages/key_message.hpp"
+#include "../user_interface/user_interface.hpp"
 
 class Server
 {
 private:
     int new_socket;
     SSocket* socket;
-    BaseMessage msg;
+    BaseMessage read_msg, write_msg;
     Crypto crypto;
+    UserInterface ui;
 
     enum { AES_128_KEY_SIZE = 16};
     enum { IV_SIZE = 16};

@@ -106,30 +106,30 @@ bool Server::do_handshake()
 
 void Server::do_read()
 {
-    read(new_socket, msg.data(), BaseMessage::hash_length);
-    read(new_socket, msg.header(), BaseMessage::header_length);
+    read(new_socket, read_msg.data(), BaseMessage::hash_length);
+    read(new_socket, read_msg.header(), BaseMessage::header_length);
 
-    if(msg.decode_header())
+    if(read_msg.decode_header())
     {
-        read(new_socket, msg.body(), msg.body_length());
+        read(new_socket, read_msg.body(), read_msg.body_length());
 
-        if(msg.check_hash())
+        if(read_msg.check_hash())
         {
             std::cout << "SHA256 hash checked successfully" << std::endl;
-            msg.aes_128_cbc_decrypt(aes_128_key, iv);
-            std::cout << "C: " << msg.body() << std::endl;
+            read_msg.aes_128_cbc_decrypt(aes_128_key, iv);
+            ui.read_response(read_msg.body(), write_msg);
         }
     }
 }
 
 void Server::do_write()
-{
-    msg.aes_128_cbc_encrypt(aes_128_key, iv);
-    msg.encode_header();
-    msg.encode_hash();
+{   
+    write_msg.aes_128_cbc_encrypt(aes_128_key, iv);
+    write_msg.encode_header();
+    write_msg.encode_hash();
     
-    write(new_socket, msg.data(), msg.length());
-    std::memset(msg.data(), 0, msg.length());
+    write(new_socket, write_msg.data(), write_msg.length());
+    std::memset(write_msg.data(), 0, write_msg.length());
 }
 
 void Server::launch()
@@ -137,6 +137,10 @@ void Server::launch()
     std::cout << "Waiting for connection..." << std::endl;
     
     do_accept();
+
+    // Sending the menu to the client
+    ui.get_menu(write_msg);
+    do_write();
 
     while(true)
     {
