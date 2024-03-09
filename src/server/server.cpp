@@ -115,7 +115,6 @@ void Server::do_read()
 
         if(read_msg.check_hash())
         {
-            std::cout << "SHA256 hash checked successfully" << std::endl;
             read_msg.aes_128_cbc_decrypt(aes_128_key, iv);
             ui.read_response(read_msg.body(), write_msg);
         }

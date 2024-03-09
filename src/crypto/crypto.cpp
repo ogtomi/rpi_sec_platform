@@ -108,8 +108,6 @@ EVP_PKEY* Crypto::generate_ec_key()
 
     if(EVP_PKEY_keygen(ctx, &pkey) <= 0)
         goto err;
-    
-    std::cout << "Key generation successful." << std::endl;
 
     EVP_PKEY_CTX_free(ctx);
     return pkey;

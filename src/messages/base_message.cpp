@@ -84,10 +84,6 @@ bool BaseMessage::check_hash()
 
     crypto.sha256(this->body(), std::strlen(this->body()), hash_calculated);
 
-    std::cout << "Calculated hash: ";
-    for(int i = 0; i < SHA256_DIGEST_LENGTH; i++) printf("%02x", hash_calculated[i]);
-    printf("\n");
-
     for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
     {
         ptr += std::sprintf(ptr, "%02x", hash_calculated[i]);

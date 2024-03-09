@@ -10,6 +10,10 @@ Client::Client(int domain, int service, int protocol, int port, u_long interface
         close(socket->get_sock());
         exit(EXIT_FAILURE);
     }
+    else
+    {
+        std::cout << "Connected to server." << std::endl;
+    }
 }
 
 Client::~Client()
@@ -94,7 +98,6 @@ void Client::do_read()
 
         if(read_msg.check_hash())
         {
-            std::cout << "SHA256 hash checked successfully" << std::endl;
             read_msg.aes_128_cbc_decrypt(aes_128_key, iv);
             std::cout << "S: " << read_msg.body() << std::endl;
         }
