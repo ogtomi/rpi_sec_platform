@@ -112,11 +112,12 @@ void Server::do_read()
     if(read_msg.decode_header())
     {
         read(new_socket, read_msg.body(), read_msg.body_length());
-
+        
         if(read_msg.check_hash())
         {
             read_msg.aes_128_cbc_decrypt(aes_128_key, iv);
             ui.read_response(read_msg.body(), write_msg);
+            std::memset(read_msg.data(), 0, read_msg.length());
         }
     }
 }
