@@ -12,7 +12,7 @@ private:
     Crypto crypto;
 
     bool create_user(char* username, char* password, size_t password_size);
-    void split_response(char* read_msg_body, char** output_buff);
+    int split_response(char* read_msg_body, char** output_buff);
 
 public:
     void get_menu(BaseMessage &write_msg);

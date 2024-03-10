@@ -8,8 +8,9 @@ private:
 
 public:
     Manage_DB(std::string con_credentials);
-    void execute_transactional(std::string sql);
+    bool execute_transactional(std::string sql);
     void select(std::string sql);
+    bool user_exists(char* username);
     ~Manage_DB();
 
 private:

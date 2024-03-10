@@ -6,7 +6,6 @@ void UserInterface::get_menu(BaseMessage &write_msg)
         \n-USER MENU-\n\
         1. Create user\n\
         2. Login\n\
-        3. Show content\n\
     ";
 
     write_msg.body_length(std::strlen(menu));
@@ -37,6 +36,13 @@ void UserInterface::read_response(char* read_msg_body, BaseMessage &write_msg)
     switch(std::atoi(split_msg[0]))
     {
         case 1:
+            if(dbmg.user_exists(split_msg[1]))
+            {
+                msg = "User already exists.";
+                write_msg.body_length(msg.size());
+                std::memcpy(write_msg.body(), msg.c_str(), write_msg.body_length());
+                break;
+            }
             if(!create_user(split_msg[1], split_msg[2], std::strlen(split_msg[2])))
             {
                 msg = "Error while creating an user.";
@@ -45,7 +51,7 @@ void UserInterface::read_response(char* read_msg_body, BaseMessage &write_msg)
             }
             else
             {
-                msg = "Successfully created user";
+                msg = "Successfully created user.";
                 write_msg.body_length(msg.size());
                 std::memcpy(write_msg.body(), msg.c_str(), write_msg.body_length());
             }
@@ -53,12 +59,6 @@ void UserInterface::read_response(char* read_msg_body, BaseMessage &write_msg)
         
         case 2:
             msg = "Successfully completed option 2.";
-            write_msg.body_length(msg.size());
-            std::memcpy(write_msg.body(), msg.c_str(), write_msg.body_length());
-            break;
-        
-        case 3:
-            msg = "Successfully completed option 3.";
             write_msg.body_length(msg.size());
             std::memcpy(write_msg.body(), msg.c_str(), write_msg.body_length());
             break;
@@ -86,14 +86,9 @@ bool UserInterface::create_user(char* username, char* password, size_t password_
 
     std::string username_str(username);
     std::string hash_password_str(hash_buff);
-    
-    std::cout << username_str << std::endl;
-    std::cout << hash_password_str << std::endl;
 
     std::string sql_cmd = "INSERT INTO usr_credentials (name, password) " \
         "VALUES ('" + username_str + "' , '" + hash_password_str + "' );";
-
-    dbmg.execute_transactional(sql_cmd);
-    
-    return true;
+        
+    return dbmg.execute_transactional(sql_cmd);
 }

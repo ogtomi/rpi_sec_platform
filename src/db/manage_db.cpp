@@ -23,7 +23,7 @@ void Manage_DB::check_connection(pqxx::connection &C)
     } 
 }
 
-void Manage_DB::execute_transactional(std::string sql)
+bool Manage_DB::execute_transactional(std::string sql)
 {
     try
     {
@@ -31,11 +31,13 @@ void Manage_DB::execute_transactional(std::string sql)
         W.exec(sql);
         W.commit();
 
-        std::cout << "Operation executed successfully" << std::endl;
+        std::cout << "Operation executed successfully." << std::endl;
+        return true;
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << std::endl;
+        return false;
     }
 }
 
@@ -58,4 +60,24 @@ void Manage_DB::select(std::string sql)
     {
         std::cerr << e.what() << std::endl;
     }
+}
+
+bool Manage_DB::user_exists(char* username)
+{
+    std::string username_str(username);
+    std::string sql = "SELECT EXISTS(SELECT 1 FROM usr_credentials WHERE name='" + username_str + "')";
+
+    try
+    {
+        pqxx::nontransaction N(C);
+        pqxx::result R(N.exec(sql));
+
+        return R.begin()[0].as<bool>();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return false;
+    }
+    
 }
