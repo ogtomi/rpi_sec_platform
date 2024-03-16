@@ -23,8 +23,11 @@ void Manage_DB::check_connection(pqxx::connection &C)
     } 
 }
 
-bool Manage_DB::execute_transactional(const std::string &sql)
+bool Manage_DB::add_user(const std::string &username, const std::string &hash_password)
 {
+    std::string sql = "INSERT INTO usr_credentials (name, password) " \
+        "VALUES ('" + username + "' , '" + hash_password + "' );";
+
     try
     {
         pqxx::work W(C);
@@ -41,24 +44,21 @@ bool Manage_DB::execute_transactional(const std::string &sql)
     }
 }
 
-void Manage_DB::select(std::string sql)
+std::string Manage_DB::get_password_hash(const std::string &username, const std::string &hash_password)
 {
+    std::string sql = "SELECT * FROM usr_credentials WHERE name='" + username + "'";
+
     try
     {
         pqxx::nontransaction N(C);
         pqxx::result R(N.exec(sql));
 
-        for(pqxx::result::const_iterator c = R.begin(); c != R.end(); ++c)
-        {
-            std::cout << "User: " << c[0].as<std::string>() << std::endl;
-        }
-
-        std::cout << "Operation done successfully" << std::endl;
-
+        return R.begin()[1].as<std::string>();
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << std::endl;
+        return "";
     }
 }
 
