@@ -23,7 +23,7 @@ void Manage_DB::check_connection(pqxx::connection &C)
     } 
 }
 
-bool Manage_DB::execute_transactional(std::string sql)
+bool Manage_DB::execute_transactional(const std::string &sql)
 {
     try
     {
@@ -62,10 +62,9 @@ void Manage_DB::select(std::string sql)
     }
 }
 
-bool Manage_DB::user_exists(char* username)
+bool Manage_DB::user_exists(const std::string &username)
 {
-    std::string username_str(username);
-    std::string sql = "SELECT EXISTS(SELECT 1 FROM usr_credentials WHERE name='" + username_str + "')";
+    std::string sql = "SELECT EXISTS(SELECT 1 FROM usr_credentials WHERE name='" + username + "')";
 
     try
     {

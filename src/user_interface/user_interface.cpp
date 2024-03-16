@@ -12,38 +12,58 @@ void UserInterface::get_menu(BaseMessage &write_msg)
     std::memcpy(write_msg.body(), menu, write_msg.body_length());
 }
 
-void UserInterface::split_response(char* read_msg_body, char** output_buff)
+int UserInterface::split_response(char* read_msg_body, std::vector<std::string> &output_buff)
 {   
     const char* delimiter = " ";
     int i = 0;
 
-    output_buff[i] = std::strtok(read_msg_body, delimiter);
+    char* token = std::strtok(read_msg_body, delimiter);
 
-    while(output_buff[i] != NULL && i < 2)
+    if(token != NULL)
+    {
+        output_buff.push_back(token);
+    }
+
+    while(token != NULL)
     {
         i++;
-        output_buff[i] = std::strtok(NULL, delimiter);
+        token = std::strtok(NULL, delimiter);
+
+        if(token != NULL)
+        {
+            output_buff.push_back(token);
+        }
     }
+
+    return i;
 }
 
 void UserInterface::read_response(char* read_msg_body, BaseMessage &write_msg)
 {
+    int argc;
     std::string msg;
-    char* split_msg[3];
+    std::vector<std::string> split_msg;
 
-    split_response(read_msg_body, split_msg);
+    argc = split_response(read_msg_body, split_msg);
 
-    switch(std::atoi(split_msg[0]))
+    switch(std::stoi(split_msg[0]))
     {
         case 1:
-            if(dbmg.user_exists(split_msg[1]))
+            if(argc != 3)
+            {
+                msg = "Invalid number of parameters.";
+                write_msg.body_length(msg.size());
+                std::memcpy(write_msg.body(), msg.c_str(), write_msg.body_length());
+                break;  
+            }
+            if(dbmg.user_exists(split_msg[1].c_str()))
             {
                 msg = "User already exists.";
                 write_msg.body_length(msg.size());
                 std::memcpy(write_msg.body(), msg.c_str(), write_msg.body_length());
                 break;
             }
-            if(!create_user(split_msg[1], split_msg[2], std::strlen(split_msg[2])))
+            if(!create_user(split_msg[1], split_msg[2], split_msg[2].size()))
             {
                 msg = "Error while creating an user.";
                 write_msg.body_length(msg.size());
@@ -71,13 +91,13 @@ void UserInterface::read_response(char* read_msg_body, BaseMessage &write_msg)
     }
 }
 
-bool UserInterface::create_user(char* username, char* password, size_t password_size)
+bool UserInterface::create_user(const std::string &username, const std::string &password, const size_t password_size)
 {
     unsigned char hash_password[SHA256_DIGEST_LENGTH];
     char hash_buff[BaseMessage::hash_length + 1];
     char *ptr = &hash_buff[0];
 
-    crypto.sha256(password, password_size, hash_password);
+    crypto.sha256(password.c_str(), password_size, hash_password);
 
     for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
     {
