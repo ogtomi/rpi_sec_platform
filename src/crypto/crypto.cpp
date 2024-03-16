@@ -1,6 +1,6 @@
 #include "crypto.hpp"
 
-void Crypto::sha256(char* msg, size_t msg_size, unsigned char* output_buff)
+void Crypto::sha256(const char* msg, size_t msg_size, unsigned char* output_buff)
 {
     EVP_MD_CTX *mdctx = EVP_MD_CTX_create();
     const EVP_MD *md = EVP_MD_fetch(NULL, "SHA256", NULL);
