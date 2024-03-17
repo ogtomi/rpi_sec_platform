@@ -13,6 +13,7 @@ private:
     Crypto crypto;
 
     bool create_user(const std::string &username, const std::string &password, const size_t password_size);
+    bool login(const std::string &username, const std::string &password, const std::size_t password_size);
     int split_response(char* read_msg_body, std::vector<std::string> &output_buff);
 
 public:
