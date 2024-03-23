@@ -6,7 +6,6 @@
 
 #include "../sockets/s_socket.hpp"
 #include "../messages/base_message.hpp"
-#include "../messages/key_message.hpp"
 #include "../user_interface/user_interface.hpp"
 
 class Server
@@ -18,8 +17,8 @@ private:
     Crypto crypto;
     UserInterface ui;
 
-    enum { AES_128_KEY_SIZE = 16};
-    enum { IV_SIZE = 16};
+    enum { AES_128_KEY_SIZE = 16,
+            IV_SIZE = 16};
     unsigned char aes_128_key[AES_128_KEY_SIZE] = {'\0'};
     unsigned char iv[IV_SIZE] = {'\0'};
 

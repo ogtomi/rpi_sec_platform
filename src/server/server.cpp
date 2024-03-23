@@ -47,7 +47,7 @@ bool Server::do_handshake()
 {
     // Client & Server keys (+ key messages)
     EVP_PKEY *ckey = NULL, *skey = NULL;
-    KeyMessage server_pubkey_msg, client_pubkey_msg;
+    Message server_pubkey_msg, client_pubkey_msg;
 
     // Key serialization vars
     size_t serialized_key_len = 0;
@@ -61,10 +61,12 @@ bool Server::do_handshake()
     // HANDSHAKE
     // Generate and serialize the key
     skey = crypto.generate_ec_key();
-    if(skey == NULL) return false;
+    if(skey == NULL)
+        return false;
 
     serialized_key = crypto.serialize_key(skey, serialized_key_len);
-    if(serialized_key == NULL) return false;
+    if(serialized_key == NULL)
+        return false;
 
     // Send the key to the client
     server_pubkey_msg.body_length(serialized_key_len);
@@ -73,23 +75,21 @@ bool Server::do_handshake()
     write(new_socket, server_pubkey_msg.data(), server_pubkey_msg.length());
     
     // Read key from the client
-    read(new_socket, client_pubkey_msg.data(), KeyMessage::header_length);
+    read(new_socket, client_pubkey_msg.data(), Message::header_length);
 
-    if(client_pubkey_msg.decode_header())
-    {
-        read(new_socket, client_pubkey_msg.body(), client_pubkey_msg.body_length());
-    }
-    else
-    {
+    if(!client_pubkey_msg.decode_header())
         return false;
-    }
+
+    read(new_socket, client_pubkey_msg.body(), client_pubkey_msg.body_length());
 
     // Obtain a shared secret using ECDH
     ckey = crypto.deserialize_key((unsigned char*)client_pubkey_msg.body(), client_pubkey_msg.body_length());
-    if(ckey == NULL) return false;
-
+    if(ckey == NULL)
+        return false;
+    
     secret = crypto.ecdh(&secret_len, skey, ckey);
-    if(secret == NULL) return false;
+    if(secret == NULL)
+        return false;
 
     // Hash the shared secret with SHA256
     crypto.sha256((char*)secret, secret_len, hashed_secret);
@@ -109,17 +109,17 @@ void Server::do_read()
     read(new_socket, read_msg.data(), BaseMessage::hash_length);
     read(new_socket, read_msg.header(), BaseMessage::header_length);
 
-    if(read_msg.decode_header())
-    {
-        read(new_socket, read_msg.body(), read_msg.body_length());
+    if(!read_msg.decode_header())
+        return;
+
+    read(new_socket, read_msg.body(), read_msg.body_length());
         
-        if(read_msg.check_hash())
-        {
-            read_msg.aes_128_cbc_decrypt(aes_128_key, iv);
-            ui.read_response(read_msg.body(), write_msg);
-            std::memset(read_msg.data(), 0, read_msg.length());
-        }
-    }
+    if(!read_msg.check_hash())
+        return;
+
+    read_msg.aes_128_cbc_decrypt(aes_128_key, iv);
+    ui.read_response(read_msg.body(), write_msg);
+    std::memset(read_msg.data(), 0, read_msg.length());
 }
 
 void Server::do_write()
@@ -127,7 +127,6 @@ void Server::do_write()
     write_msg.aes_128_cbc_encrypt(aes_128_key, iv);
     write_msg.encode_header();
     write_msg.encode_hash();
-    
     write(new_socket, write_msg.data(), write_msg.length());
     std::memset(write_msg.data(), 0, write_msg.length());
 }
