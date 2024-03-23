@@ -13,6 +13,7 @@ class Crypto
 {
 public:
     void sha256(const char* msg, size_t msg_size, unsigned char* output_buff);
+    void sha256_to_char(const unsigned char* msg, size_t msg_size, char* output_buff);
     int aes_128_cbc_encrypt(unsigned char* plaintext, int plaintext_len, unsigned char* aes_128_key, unsigned char* iv, unsigned char* ciphertext);
     int aes_128_cbc_decrypt(unsigned char* ciphertext, int ciphertext_len, unsigned char* aes_128_key, unsigned char* iv, unsigned char* plaintext);
     EVP_PKEY* generate_ec_key();

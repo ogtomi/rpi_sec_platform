@@ -118,14 +118,9 @@ bool UserInterface::create_user(const std::string &username, const std::string &
 {
     unsigned char hash_password[SHA256_DIGEST_LENGTH];
     char hash_buff[BaseMessage::hash_length + 1];
-    char *ptr = &hash_buff[0];
 
     crypto.sha256(password.c_str(), password_size, hash_password);
-
-    for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-    {
-        ptr += std::sprintf(ptr, "%02x", hash_password[i]);
-    }
+    crypto.sha256_to_char(hash_password, SHA256_DIGEST_LENGTH, hash_buff);
 
     std::string hash_password_str(hash_buff);
 
@@ -137,14 +132,9 @@ bool UserInterface::login(const std::string &username, const std::string &passwo
     std::string hash_password_db = dbmg.get_password_hash(username, password);
     unsigned char hash_password[SHA256_DIGEST_LENGTH];
     char hash_buff[BaseMessage::hash_length + 1];
-    char *ptr = &hash_buff[0];
 
     crypto.sha256(password.c_str(), password_size, hash_password);
-
-    for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-    {
-        ptr += std::sprintf(ptr, "%02x", hash_password[i]);
-    }
+    crypto.sha256_to_char(hash_password, SHA256_DIGEST_LENGTH, hash_buff);
 
     std::string hash_password_str(hash_buff);
 

@@ -46,14 +46,9 @@ void BaseMessage::encode_hash()
 {
     unsigned char hash[SHA256_DIGEST_LENGTH + 1];
     char hash_buff[hash_length + 1];
-    char *ptr = &hash_buff[0];
 
     crypto.sha256(this->body(), std::strlen(this->body()), hash);
-
-    for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-    {
-        ptr += std::sprintf(ptr, "%02x", hash[i]);
-    }
+    crypto.sha256_to_char(hash, SHA256_DIGEST_LENGTH, hash_buff);
 
     std::memcpy(data_, hash_buff, hash_length);
 }
@@ -62,14 +57,9 @@ bool BaseMessage::check_hash()
 {
     unsigned char hash_calculated[SHA256_DIGEST_LENGTH + 1];
     char hash_calculated_buff[hash_length + 1];
-    char *ptr = &hash_calculated_buff[0];
 
     crypto.sha256(this->body(), std::strlen(this->body()), hash_calculated);
-
-    for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-    {
-        ptr += std::sprintf(ptr, "%02x", hash_calculated[i]);
-    }
+    crypto.sha256_to_char(hash_calculated, SHA256_DIGEST_LENGTH, hash_calculated_buff);
 
     for(int i = 0; i < hash_length; i++)
     {

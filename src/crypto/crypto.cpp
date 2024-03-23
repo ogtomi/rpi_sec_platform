@@ -12,6 +12,16 @@ void Crypto::sha256(const char* msg, size_t msg_size, unsigned char* output_buff
     EVP_MD_CTX_destroy(mdctx);
 }
 
+void Crypto::sha256_to_char(const unsigned char* msg, size_t msg_size, char* output_buff)
+{
+    char *ptr = &output_buff[0];
+    
+    for(size_t i = 0; i < msg_size; i++)
+    {
+        ptr += std::sprintf(ptr, "%02x", msg[i]);
+    }
+}
+
 int Crypto::aes_128_cbc_encrypt(unsigned char* plaintext, int plaintext_len, unsigned char* aes_128_key, unsigned char* iv, unsigned char* ciphertext)
 {
     EVP_CIPHER_CTX *ctx;
