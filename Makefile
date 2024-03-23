@@ -1,7 +1,7 @@
-CXX				:= g++
+CXX			:= g++
 CXX_FLAGS		:= -Wall
-OPENSSL_FLAGS	:= -lssl -lcrypto
-LIBPQXX_FLAGS	:= -lpqxx -lpq
+OPENSSL_FLAGS		:= -lssl -lcrypto
+LIBPQXX_FLAGS		:= -lpqxx -lpq
 
 SERVER_EXE		:= rpiserver
 CLIENT_EXE		:= rpiclient
