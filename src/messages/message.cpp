@@ -1,31 +1,31 @@
-#include "key_message.hpp"
+#include "message.hpp"
 
-KeyMessage::KeyMessage():
+Message::Message():
     body_length_(0)
 {
 }
 
-char* KeyMessage::data()
+char* Message::data()
 {
     return data_;
 }
 
-std::size_t KeyMessage::length()
+std::size_t Message::length()
 {
     return header_length + body_length_;
 }
 
-char* KeyMessage::body()
+char* Message::body()
 {
     return data_ + header_length;
 }
 
-std::size_t KeyMessage::body_length()
+std::size_t Message::body_length()
 {
     return body_length_;
 }
 
-void KeyMessage::body_length(std::size_t new_length)
+void Message::body_length(std::size_t new_length)
 {
     body_length_ = new_length;
 
@@ -33,7 +33,7 @@ void KeyMessage::body_length(std::size_t new_length)
         body_length_ = max_body_length;
 }
 
-bool KeyMessage::decode_header()
+bool Message::decode_header()
 {
     char header[header_length + 1] = "";
     std::strncat(header, data_, header_length);
@@ -44,11 +44,11 @@ bool KeyMessage::decode_header()
         body_length_ = 0;
         return false;
     }
-    
+
     return true;
 }
 
-void KeyMessage::encode_header()
+void Message::encode_header()
 {
     char header[header_length + 1] = "";
     std::sprintf(header, "%4d", static_cast<int>(body_length_));

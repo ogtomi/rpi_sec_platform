@@ -6,31 +6,21 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "message.hpp"
 #include "../crypto/crypto.hpp"
 
-class BaseMessage
+class BaseMessage : public Message
 {
 public:
-    enum { header_length = 4};
     enum { hash_length = SHA256_DIGEST_LENGTH * 2};
-    enum { max_body_length = 1024};
-
-private:
-    char data_[hash_length + header_length + max_body_length] = {'\0'};
-    std::size_t body_length_;
-
-    Crypto crypto;
 
 public:
     BaseMessage();
-    char* data();
-    std::size_t length();
-    char* body();
-    std::size_t body_length();
-    void body_length(std::size_t new_length);
+    std::size_t length() override;
+    char* body() override;
     char* header();
-    bool decode_header();
-    void encode_header();
+    bool decode_header() override;
+    void encode_header() override;
     void encode_hash();
     bool check_hash();
 

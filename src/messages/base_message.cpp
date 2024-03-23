@@ -1,13 +1,8 @@
 #include "base_message.hpp"
 
 BaseMessage::BaseMessage():
-    body_length_(0)
+    Message()
 {
-}
-
-char* BaseMessage::data()
-{
-    return data_;
 }
 
 std::size_t BaseMessage::length()
@@ -18,19 +13,6 @@ std::size_t BaseMessage::length()
 char* BaseMessage::body()
 {
     return data_ + header_length + hash_length;
-}
-
-std::size_t BaseMessage::body_length()
-{
-    return body_length_;
-}
-
-void BaseMessage::body_length(std::size_t new_length)
-{
-    body_length_ = new_length;
-
-    if(body_length_ > max_body_length)
-        body_length_ = max_body_length;
 }
 
 char* BaseMessage::header()
