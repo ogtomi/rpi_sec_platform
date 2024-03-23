@@ -78,5 +78,4 @@ bool Manage_DB::user_exists(const std::string &username)
         std::cerr << e.what() << '\n';
         return false;
     }
-    
 }
